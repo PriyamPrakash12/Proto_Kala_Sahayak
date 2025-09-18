@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kala Sahayak 🎨</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #fceabb, #f8b500);
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 60px auto;
+            background-color: #fff;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+            animation: fadeIn 1s ease-in-out;
+        }
+
+        h1 {
+            color: #d9534f;
+            text-align: center;
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+        }
+
+        p {
+            text-align: center;
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-top: 15px;
+            font-weight: bold;
+            font-size: 1rem;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 12px;
+            margin-top: 8px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        input:focus, textarea:focus {
+            border-color: #d9534f;
+            outline: none;
+            box-shadow: 0 0 8px rgba(217, 83, 79, 0.4);
+        }
+
+        button {
+            background-color: #d9534f;
+            color: white;
+            padding: 14px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            margin-top: 20px;
+            width: 100%;
+            transition: background 0.3s ease, transform 0.2s ease;
+        }
+
+        button:hover {
+            background-color: #c9302c;
+            transform: scale(1.05);
+        }
+
+        #result {
+            margin-top: 30px;
+            background-color: #f9f9f9;
+            padding: 25px;
+            border-left: 6px solid #d9534f;
+            border-radius: 8px;
+            display: none;
+            animation: fadeIn 0.8s ease-in-out;
+        }
+
+        #loader {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+            font-size: 1.2rem;
+        }
+
+        #error {
+            margin-top: 20px;
+            color: red;
+            font-weight: bold;
+            display: none;
+            text-align: center;
+        }
+
+        @keyframes fadeIn {
+            from {opacity: 0; transform: translateY(10px);}
+            to {opacity: 1; transform: translateY(0);}
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Kala Sahayak 🎨</h1>
+        <p>Enter your product details, and our AI will craft a professional listing for you.</p>
+        
+        <form id="listing-form">
+            <label for="product_name">What is your product?</label>
+            <input type="text" id="product_name" placeholder="e.g., Aipan Chowki, Wooden Elephant" required>
+
+            <label for="materials">What materials did you use?</label>
+            <input type="text" id="materials" placeholder="e.g., Mango wood, Geru, Pirul" required>
+
+            <label for="time_taken">How long did it take to make?</label>
+            <input type="text" id="time_taken" placeholder="e.g., 2 days, 15 hours" required>
+
+            <label for="special_notes">Any special story or detail?</label>
+            <textarea id="special_notes" rows="3" placeholder="e.g., Traditional design for weddings"></textarea>
+            
+            <button type="submit">✨ Generate Listing</button>
+        </form>
+
+        <div id="loader">⏳ Loading... Please wait.</div>
+        <div id="error"></div>
+        
+        <div id="result">
+            <h2>Your AI-Generated Listing:</h2>
+            <h3 id="result-title"></h3>
+            <p id="result-description" style="white-space: pre-wrap;"></p>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById("listing-form").addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            const product_name = document.getElementById("product_name").value;
+            const materials = document.getElementById("materials").value;
+            const time_taken = document.getElementById("time_taken").value;
+            const special_notes = document.getElementById("special_notes").value;
+
+            document.getElementById("loader").style.display = "block";
+            document.getElementById("error").style.display = "none";
+            document.getElementById("result").style.display = "none";
+
+            try {
+                const response = await fetch("/generate-listing", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ product_name, materials, time_taken, special_notes })
+                });
+
+                const data = await response.json();
+                document.getElementById("loader").style.display = "none";
+
+                if (data.error) {
+                    document.getElementById("error").innerText = "❌ " + data.error;
+                    document.getElementById("error").style.display = "block";
+                } else {
+                    document.getElementById("result-title").innerText = data.title;
+                    document.getElementById("result-description").innerText = data.description;
+                    document.getElementById("result").style.display = "block";
+                }
+            } catch (err) {
+                document.getElementById("loader").style.display = "none";
+                document.getElementById("error").innerText = "⚠️ Something went wrong!";
+                document.getElementById("error").style.display = "block";
+            }
+        });
+    </script>
+</body>
+</html>
